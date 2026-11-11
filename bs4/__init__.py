@@ -1025,9 +1025,6 @@ class BeautifulSoup(Tag):
         # print("Start tag %s: %s" % (name, attrs))
         self.endData()
 
-        if self.replacer is not None and name == self.replacer.og_tag:
-            name = self.replacer.alt_tag
-
         if (
             self.parse_only
             and len(self.tagStack) <= 1
@@ -1054,6 +1051,8 @@ class BeautifulSoup(Tag):
         )
         if tag is None:
             return tag
+        if self.replacer is not None:
+            self.replacer.transform(tag, name)
         if self._most_recent_element is not None:
             self._most_recent_element.next_element = tag
         self._most_recent_element = tag
@@ -1070,8 +1069,14 @@ class BeautifulSoup(Tag):
         """
         # print("End tag: " + name)
         self.endData()
-        if self.replacer is not None and name == self.replacer.og_tag:
-            name = self.replacer.alt_tag
+        if self.replacer is not None:
+            for tag in reversed(self.tagStack[1:]):
+                if (
+                    getattr(tag, "_soup_replacer_original_name", None) == name
+                    and tag.prefix == nsprefix
+                ):
+                    name = tag.name
+                    break
         self._popToTag(name, nsprefix)
 
     def handle_data(self, data: str) -> None:
