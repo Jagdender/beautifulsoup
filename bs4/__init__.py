@@ -175,6 +175,10 @@ class BeautifulSoup(Tag):
     #: during parsing to detect data chunks that seem 'empty'.
     ASCII_SPACES: str = "\x20\x0a\x09\x0c\x0d"
 
+    def __iter__(self) -> Iterator[PageElement]:
+        """Iterate over this document and all of its descendants."""
+        return self.descendants
+
     # FUTURE PYTHON:
     element_classes: Dict[Type[PageElement], Type[PageElement]]  #: :meta private:
     builder: TreeBuilder  #: :meta private:
